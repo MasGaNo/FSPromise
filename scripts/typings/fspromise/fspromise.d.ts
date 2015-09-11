@@ -1,10 +1,17 @@
+// Type definitions for FSPromise
+// Project: https://github.com/MasGaNo/FSPromise
+// Definitions by: Norbert TRAN PHAT <https://github.com/MasGaNo>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
+// Library documentation : https://github.com/MasGaNo/FSPromise/blob/master/documentation.md
+
 /// <reference path="../es6-promise/es6-promise.d.ts" />
-export declare class FSPromiseCancelError {
+declare class FSPromiseCancelError {
     name: string;
     message: string;
     constructor(message?: string);
 }
-export declare class FSPromise<R> implements Thenable<R> {
+declare class FSPromise<R> implements Thenable<R> {
     private internalPromise;
     private isAbort;
     /**
@@ -55,4 +62,12 @@ export declare class FSPromise<R> implements Thenable<R> {
      * Make a Promise that fulfills when any item fulfills, and rejects if any item rejects.
      */
     static race<R>(promises: (R | Thenable<R>)[]): FSPromise<R>;
+}
+
+declare module 'FSPromise' {
+    var foo: typeof FSPromise; // Temp variable to reference Promise in local context
+    module rsvp {
+        export var FSPromise: typeof foo;
+    }
+    export = rsvp;
 }
