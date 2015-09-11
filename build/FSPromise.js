@@ -169,5 +169,12 @@
         return FSPromise;
     })();
     exports.FSPromise = FSPromise;
+    /**
+     * Activate ES6Promise polyfill
+     **/
+    function polyfill() {
+        ES6Promise.polyfill();
+    }
+    exports.polyfill = polyfill;
 });
 //# sourceMappingURL=FSPromise.js.map
