@@ -52,7 +52,7 @@
          */
         FSPromise.prototype.then = function (onFulfilled, onRejected) {
             var _this = this;
-            return new FSPromise(function (resolve, reject) {
+            var promise = new FSPromise(function (resolve, reject) {
                 _this.internalPromise.then(function (value) {
                     if (_this.isAbort) {
                         reject(new FSPromiseCancelError('Cancel'));
@@ -85,6 +85,8 @@
                     }
                 });
             });
+            promise.parentPromise = this;
+            return promise;
         };
         /**
          * Sugar for promise.then(undefined, onRejected)
@@ -99,6 +101,9 @@
          */
         FSPromise.prototype.abort = function () {
             this.isAbort = true;
+            if (!!this.parentPromise) {
+                this.parentPromise.abort();
+            }
         };
         /**
          * Make a new promise from the thenable.

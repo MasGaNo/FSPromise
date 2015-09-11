@@ -17,6 +17,7 @@ export class FSPromiseCancelError {
 export class FSPromise<R> implements Thenable<R> {
 
     private internalPromise: Promise<R>;
+    private parentPromise: FSPromise<R>;
     private isAbort: boolean;
 
 	/**
@@ -62,7 +63,7 @@ export class FSPromise<R> implements Thenable<R> {
      */
     then<U>(onFulfilled?: (value: R) => U | Thenable<U>, onRejected?: (error: any) => U | Thenable<U>): FSPromise<U> {
 
-        return new FSPromise((resolve, reject) => {
+        let promise = new FSPromise((resolve, reject) => {
 
             this.internalPromise.then((value: R) => {
 
@@ -105,6 +106,10 @@ export class FSPromise<R> implements Thenable<R> {
             });
 
         });
+
+        promise.parentPromise = this;
+
+        return promise;
    
     }
 
@@ -124,6 +129,9 @@ export class FSPromise<R> implements Thenable<R> {
      */
     abort(): void {
         this.isAbort = true;
+        if (!!this.parentPromise) {
+            this.parentPromise.abort();
+        }
     }
 
 
