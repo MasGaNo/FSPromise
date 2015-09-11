@@ -216,4 +216,11 @@ export class FSPromise<R> implements Thenable<R> {
 
         return promise;
     }
+
+    /**
+     * Activate ES6Promise polyfill
+     **/
+    public static polyfill(): void {
+        (<any>ES6Promise).polyfill();
+    }
 }
