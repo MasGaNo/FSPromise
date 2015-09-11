@@ -194,3 +194,9 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+
+
+# Remove all Visual Studio dependencies
+*.sln
+*.csproj
+*.config
