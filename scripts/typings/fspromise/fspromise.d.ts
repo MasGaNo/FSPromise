@@ -73,10 +73,10 @@ declare function polyfill(): void;
 declare module 'FSPromise' {
     var foo: typeof FSPromise; // Temp variable to reference Promise in local context
     var bar: typeof FSPromiseCancelError;
-    module FSPromise {
+    module FSPromiseDefinition {
         export var FSPromise: typeof foo;
         export var FSPromiseCancelError: typeof bar;
         export function polyfill(): void;
     }
-    export = FSPromise;
+    export = FSPromiseDefinition;
 }
