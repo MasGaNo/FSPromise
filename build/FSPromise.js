@@ -1,13 +1,13 @@
 /// <reference path="scripts/typings/es6-promise/es6-promise.d.ts" />
 'use strict';
-(function (deps, factory) {
+(function (factory) {
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports); if (v !== undefined) module.exports = v;
     }
     else if (typeof define === 'function' && define.amd) {
-        define(deps, factory);
+        define(["require", "exports", 'es6-promise'], factory);
     }
-})(["require", "exports", 'es6-promise'], function (require, exports) {
+})(function (require, exports) {
     var ES6Promise = require('es6-promise');
     var Promise = ES6Promise.Promise;
     var FSPromiseCancelError = (function () {

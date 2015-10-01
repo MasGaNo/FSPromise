@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "umd",
+        "outDir": "build",
+        "sourceMap": true,
+        "declaration": false
+    },
+    "files": [
+        "FSPromise.ts"
+    ]
+}
