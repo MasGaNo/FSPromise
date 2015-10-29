@@ -30,14 +30,19 @@
             var _this = this;
             this.isAbort = false;
             this.internalPromise = new Promise(function (resolve, reject) {
-                callback(function (value) {
-                    if (_this.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
-                    }
-                    resolve(value);
-                }, function (value) {
-                    reject(value);
-                });
+                try {
+                    callback(function (value) {
+                        if (_this.isAbort) {
+                            reject(new FSPromiseCancelError('Cancel'));
+                        }
+                        resolve(value);
+                    }, function (value) {
+                        reject(value);
+                    });
+                }
+                catch (e) {
+                    reject(e);
+                }
             });
         }
         /**

@@ -33,19 +33,23 @@ export class FSPromise<R> implements Thenable<R> {
 
         this.internalPromise = new Promise((resolve, reject) => {
 
-            callback((value) => {
+			try {
+				callback((value) => {
 
-                if (this.isAbort) {
-                    reject(new FSPromiseCancelError('Cancel'));
-                }
+					if (this.isAbort) {
+						reject(new FSPromiseCancelError('Cancel'));
+					}
 
-                resolve(value);
+					resolve(value);
 
-            }, (value) => {
+				}, (value) => {
 
-                reject(value);
+					reject(value);
 
-            });
+				});
+			} catch(e) {
+				reject(e);
+			}
 
         });
 
