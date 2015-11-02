@@ -5,11 +5,11 @@
         var v = factory(require, exports); if (v !== undefined) module.exports = v;
     }
     else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'es6-promise'], factory);
+        define(["require", "exports"], factory);
     }
 })(function (require, exports) {
-    var ES6Promise = require('es6-promise');
-    var Promise = ES6Promise.Promise;
+    //import ES6Promise = require('es6-promise');
+    //import Promise = ES6Promise.Promise;
     var FSPromiseCancelError = (function () {
         function FSPromiseCancelError(message) {
             this.message = message;
@@ -18,6 +18,7 @@
         return FSPromiseCancelError;
     })();
     exports.FSPromiseCancelError = FSPromiseCancelError;
+    exports.Async = false;
     var FSPromise = (function () {
         /**
          * If you call resolve in the body of the callback passed to the constructor,
@@ -30,18 +31,26 @@
             var _this = this;
             this.isAbort = false;
             this.internalPromise = new Promise(function (resolve, reject) {
-                try {
-                    callback(function (value) {
-                        if (_this.isAbort) {
-                            reject(new FSPromiseCancelError('Cancel'));
-                        }
-                        resolve(value);
-                    }, function (value) {
-                        reject(value);
-                    });
+                var doCallback = function () {
+                    try {
+                        callback(function (value) {
+                            if (_this.isAbort) {
+                                reject(new FSPromiseCancelError('Cancel'));
+                            }
+                            resolve(value);
+                        }, function (value) {
+                            reject(value);
+                        });
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
+                };
+                if (exports.Async) {
+                    setTimeout(doCallback, 0);
                 }
-                catch (e) {
-                    reject(e);
+                else {
+                    doCallback();
                 }
             });
         }
@@ -58,37 +67,45 @@
         FSPromise.prototype.then = function (onFulfilled, onRejected) {
             var _this = this;
             var promise = new FSPromise(function (resolve, reject) {
-                _this.internalPromise.then(function (value) {
-                    if (_this.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
-                    }
-                    if (!onFulfilled) {
-                        resolve(value);
-                        return;
-                    }
-                    try {
-                        var returnValue = onFulfilled(value);
-                        resolve(returnValue);
-                    }
-                    catch (e) {
-                        reject(e);
-                    }
-                }, function (error) {
-                    if (_this.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
-                    }
-                    if (!onRejected) {
-                        reject(error);
-                        return;
-                    }
-                    try {
-                        var returnValue = onRejected(error);
-                        resolve(returnValue);
-                    }
-                    catch (e) {
-                        reject(e);
-                    }
-                });
+                var doCallback = function () {
+                    _this.internalPromise.then(function (value) {
+                        if (_this.isAbort) {
+                            reject(new FSPromiseCancelError('Cancel'));
+                        }
+                        if (!onFulfilled) {
+                            resolve(value);
+                            return;
+                        }
+                        try {
+                            var returnValue = onFulfilled(value);
+                            resolve(returnValue);
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    }, function (error) {
+                        if (_this.isAbort) {
+                            reject(new FSPromiseCancelError('Cancel'));
+                        }
+                        if (!onRejected) {
+                            reject(error);
+                            return;
+                        }
+                        try {
+                            var returnValue = onRejected(error);
+                            resolve(returnValue);
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    });
+                };
+                if (exports.Async) {
+                    setTimeout(doCallback, 0);
+                }
+                else {
+                    doCallback();
+                }
             });
             promise.parentPromise = this;
             return promise;
@@ -134,19 +151,27 @@
          */
         FSPromise.all = function (promises) {
             var promise = new FSPromise(function (resolve, reject) {
-                Promise.all(promises).then(function (value) {
-                    if (promise.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
-                        return;
-                    }
-                    resolve(value);
-                }, function (error) {
-                    if (promise.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
-                        return;
-                    }
-                    reject(error);
-                });
+                var doCallback = function () {
+                    Promise.all(promises).then(function (value) {
+                        if (promise.isAbort) {
+                            reject(new FSPromiseCancelError('Cancel'));
+                            return;
+                        }
+                        resolve(value);
+                    }, function (error) {
+                        if (promise.isAbort) {
+                            reject(new FSPromiseCancelError('Cancel'));
+                            return;
+                        }
+                        reject(error);
+                    });
+                };
+                if (exports.Async) {
+                    setTimeout(doCallback, 0);
+                }
+                else {
+                    doCallback();
+                }
             });
             return promise;
         };
@@ -155,31 +180,38 @@
          */
         FSPromise.race = function (promises) {
             var promise = new FSPromise(function (resolve, reject) {
-                Promise.race(promises).then(function (value) {
-                    if (promise.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
-                        return;
-                    }
-                    resolve(value);
-                }, function (error) {
-                    if (promise.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
-                        return;
-                    }
-                    reject(error);
-                });
+                var doCallback = function () {
+                    Promise.race(promises).then(function (value) {
+                        if (promise.isAbort) {
+                            reject(new FSPromiseCancelError('Cancel'));
+                            return;
+                        }
+                        resolve(value);
+                    }, function (error) {
+                        if (promise.isAbort) {
+                            reject(new FSPromiseCancelError('Cancel'));
+                            return;
+                        }
+                        reject(error);
+                    });
+                };
+                if (exports.Async) {
+                    setTimeout(doCallback, 0);
+                }
+                else {
+                    doCallback();
+                }
             });
             return promise;
         };
         return FSPromise;
     })();
     exports.FSPromise = FSPromise;
-    /**
-     * Activate ES6Promise polyfill
-     **/
-    function polyfill() {
-        ES6Promise.polyfill();
-    }
-    exports.polyfill = polyfill;
 });
+/**
+ * Activate ES6Promise polyfill
+ **/
+//export function polyfill(): void {
+//    (<any>ES6Promise).polyfill();
+//}
 //# sourceMappingURL=FSPromise.js.map

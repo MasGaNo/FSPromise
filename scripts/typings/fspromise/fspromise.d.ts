@@ -63,12 +63,17 @@ declare class FSPromise<R> implements Thenable<R> {
      */
     static race<R>(promises: (R | Thenable<R>)[]): FSPromise<R>;
 
+    /**
+     * Force all resolver to be async. Default: false.
+     **/
+    public Async: Boolean;
+
 }
 
 /**
  * Activate ES6Promise polyfill
  **/
-declare function polyfill(): void;
+//declare function polyfill(): void;
 
 declare module 'FSPromise' {
     var foo: typeof FSPromise; // Temp variable to reference Promise in local context
@@ -76,7 +81,10 @@ declare module 'FSPromise' {
     module FSPromiseDefinition {
         export var FSPromise: typeof foo;
         export var FSPromiseCancelError: typeof bar;
-        export function polyfill(): void;
+        /**
+         * Force all resolver to be async. Default: false.
+         **/
+        export var Async: Boolean;
     }
     export = FSPromiseDefinition;
 }

@@ -1,8 +1,8 @@
 ﻿/// <reference path="scripts/typings/es6-promise/es6-promise.d.ts" />
 'use strict';
 
-import ES6Promise = require('es6-promise');
-import Promise = ES6Promise.Promise;
+//import ES6Promise = require('es6-promise');
+//import Promise = ES6Promise.Promise;
 
 export class FSPromiseCancelError {
     name: string;
@@ -13,6 +13,8 @@ export class FSPromiseCancelError {
         this.name = 'FSPromiseCancelError';
     }
 }
+
+export var Async = false;
 
 export class FSPromise<R> implements Thenable<R> {
 
@@ -33,24 +35,31 @@ export class FSPromise<R> implements Thenable<R> {
 
         this.internalPromise = new Promise((resolve, reject) => {
 
-			try {
-				callback((value) => {
+            let doCallback = () => {
+                try {
+                    callback((value) => {
 
-					if (this.isAbort) {
-						reject(new FSPromiseCancelError('Cancel'));
-					}
+                        if (this.isAbort) {
+                            reject(new FSPromiseCancelError('Cancel'));
+                        }
 
-					resolve(value);
+                        resolve(value);
 
-				}, (value) => {
+                    }, (value) => {
 
-					reject(value);
+                        reject(value);
 
-				});
-			} catch(e) {
-				reject(e);
-			}
+                    });
+                } catch (e) {
+                    reject(e);
+                }
+            };
 
+            if (Async) {
+                setTimeout(doCallback, 0);
+            } else {
+                doCallback();
+            }
         });
 
     }
@@ -69,46 +78,52 @@ export class FSPromise<R> implements Thenable<R> {
 
         let promise = new FSPromise((resolve, reject) => {
 
-            this.internalPromise.then((value: R) => {
+            let doCallback = () => {
+                this.internalPromise.then((value: R) => {
 
-                if (this.isAbort) {
-                    reject(new FSPromiseCancelError('Cancel'));
-                }
+                    if (this.isAbort) {
+                        reject(new FSPromiseCancelError('Cancel'));
+                    }
 
-                if (!onFulfilled) {
-                    resolve(value);
-                    return;
-                }
+                    if (!onFulfilled) {
+                        resolve(value);
+                        return;
+                    }
 
-                try {
-                    let returnValue: U | Thenable<U> = onFulfilled(value);
-                    resolve(returnValue);
-                } catch (e) {
-                    reject(e);
-                }
+                    try {
+                        let returnValue: U | Thenable<U> = onFulfilled(value);
+                        resolve(returnValue);
+                    } catch (e) {
+                        reject(e);
+                    }
+
+                }, (error) => {
+
+                    if (this.isAbort) {
+                        reject(new FSPromiseCancelError('Cancel'));
+                    }
+
+                    if (!onRejected) {
+                        reject(error);
+                        return;
+                    }
+
+                    try {
+                        let returnValue: U | Thenable<U> = onRejected(error);
+                        resolve(returnValue);
+                    } catch (e) {
+                        reject(e);
+                    }
 
 
-            }, (error) => {
+                });
+            }
 
-                if (this.isAbort) {
-                    reject(new FSPromiseCancelError('Cancel'));
-                }
-
-                if (!onRejected) {
-                    reject(error);
-                    return;
-                }
-
-                try {
-                    let returnValue: U | Thenable<U> = onRejected(error);
-                    resolve(returnValue);
-                } catch (e) {
-                    reject(e);
-                }
-
-
-            });
-
+            if (Async) {
+                setTimeout(doCallback, 0);
+            } else {
+                doCallback();
+            }
         });
 
         promise.parentPromise = this;
@@ -165,26 +180,37 @@ export class FSPromise<R> implements Thenable<R> {
      * The fulfillment value is an array (in order) of fulfillment values. The rejection value is the first rejection value.
      */
     public static all<R>(promises: (R | Thenable<R>)[]): FSPromise<R[]> {
-        let promise =  new FSPromise((resolve, reject) => {
-            Promise.all(promises).then((value) => {
+        let promise = new FSPromise((resolve, reject) => {
 
-                if (promise.isAbort) {
-                    reject(new FSPromiseCancelError('Cancel'));
-                    return;
-                }
+            let doCallback = () => {
 
-                resolve(value);
+                Promise.all(promises).then((value) => {
 
-            }, (error) => {
+                    if (promise.isAbort) {
+                        reject(new FSPromiseCancelError('Cancel'));
+                        return;
+                    }
 
-                if (promise.isAbort) {
-                    reject(new FSPromiseCancelError('Cancel'));
-                    return;
-                }
+                    resolve(value);
 
-                reject(error);
+                }, (error) => {
 
-            });
+                    if (promise.isAbort) {
+                        reject(new FSPromiseCancelError('Cancel'));
+                        return;
+                    }
+
+                    reject(error);
+
+                });
+            };
+
+            if (Async) {
+                setTimeout(doCallback, 0);
+            } else {
+                doCallback();
+            }
+
         });
 
         return promise;
@@ -196,25 +222,34 @@ export class FSPromise<R> implements Thenable<R> {
     public static race<R>(promises: (R | Thenable<R>)[]): FSPromise<R> {
         let promise = new FSPromise((resolve, reject) => {
 
-            Promise.race(promises).then((value) => {
+            let doCallback = () => {
+                Promise.race(promises).then((value) => {
 
-                if (promise.isAbort) {
-                    reject(new FSPromiseCancelError('Cancel'));
-                    return;
-                } 
+                    if (promise.isAbort) {
+                        reject(new FSPromiseCancelError('Cancel'));
+                        return;
+                    }
 
-                resolve(value);
+                    resolve(value);
 
-            }, (error) => {
+                }, (error) => {
 
-                if (promise.isAbort) {
-                    reject(new FSPromiseCancelError('Cancel'));
-                    return;
-                }
+                    if (promise.isAbort) {
+                        reject(new FSPromiseCancelError('Cancel'));
+                        return;
+                    }
 
-                reject(error);
+                    reject(error);
 
-            });
+                });
+
+            };
+
+            if (Async) {
+                setTimeout(doCallback, 0);
+            } else {
+                doCallback();
+            }
 
         });
 
@@ -225,7 +260,7 @@ export class FSPromise<R> implements Thenable<R> {
 /**
  * Activate ES6Promise polyfill
  **/
-export function polyfill(): void {
-    (<any>ES6Promise).polyfill();
-}
+//export function polyfill(): void {
+//    (<any>ES6Promise).polyfill();
+//}
 
