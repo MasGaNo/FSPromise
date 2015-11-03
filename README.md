@@ -1,7 +1,7 @@
 # FSPromise 0.1.9
 ==============
 
-This project is not ready for use in production. It's still under heavy development. I wrote this for another project I work on right now, but its still far from being stable. Testing are fixes and comments are welcome.
+This project could be used in production. I wrote this for another project I'm working on right now. Testing, fixes and comments are welcome.
 
 ## FSPromise project details
 * ~~Extend ES6Promise until full implementation of Promise in all browser.~~
@@ -10,7 +10,7 @@ This project is not ready for use in production. It's still under heavy developm
 
 --------------------------
 
-It offers the same methods and usage, but add a method abort() to stop all Promise chain execution.
+It offers the same methods and usage as native Promise, but add a method abort() to stop all Promise chain execution.
 
 It's an UMD module, so you can include it in your CommonJS/AMD project.
 
