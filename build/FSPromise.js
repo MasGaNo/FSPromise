@@ -46,7 +46,7 @@
                     }
                 };
                 if (exports.Async) {
-                    if (!!window) {
+                    if (typeof (global) === 'object') {
                         setTimeout(doCallback, 0);
                     }
                     else {
@@ -105,7 +105,7 @@
                     });
                 };
                 if (exports.Async) {
-                    if (!!window) {
+                    if (typeof (global) === 'object') {
                         setTimeout(doCallback, 0);
                     }
                     else {
@@ -176,7 +176,7 @@
                     });
                 };
                 if (exports.Async) {
-                    if (!!window) {
+                    if (typeof (global) === 'object') {
                         setTimeout(doCallback, 0);
                     }
                     else {
@@ -210,7 +210,7 @@
                     });
                 };
                 if (exports.Async) {
-                    if (!!window) {
+                    if (typeof (global) === 'object') {
                         setTimeout(doCallback, 0);
                     }
                     else {
