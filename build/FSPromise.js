@@ -1,5 +1,3 @@
-/// <reference path="scripts/typings/es6-promise/es6-promise.d.ts" />
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports); if (v !== undefined) module.exports = v;
@@ -8,8 +6,9 @@
         define(["require", "exports"], factory);
     }
 })(function (require, exports) {
-    //import ES6Promise = require('es6-promise');
-    //import Promise = ES6Promise.Promise;
+    /// <reference path="scripts/typings/es6-promise/es6-promise.d.ts" />
+    /// <reference path="scripts/typings/node/node.d.ts" />
+    'use strict';
     var FSPromiseCancelError = (function () {
         function FSPromiseCancelError(message) {
             this.message = message;
@@ -47,7 +46,12 @@
                     }
                 };
                 if (exports.Async) {
-                    setTimeout(doCallback, 0);
+                    if (!!window) {
+                        setTimeout(doCallback, 0);
+                    }
+                    else {
+                        process.nextTick(doCallback);
+                    }
                 }
                 else {
                     doCallback();
@@ -101,7 +105,12 @@
                     });
                 };
                 if (exports.Async) {
-                    setTimeout(doCallback, 0);
+                    if (!!window) {
+                        setTimeout(doCallback, 0);
+                    }
+                    else {
+                        process.nextTick(doCallback);
+                    }
                 }
                 else {
                     doCallback();
@@ -167,7 +176,12 @@
                     });
                 };
                 if (exports.Async) {
-                    setTimeout(doCallback, 0);
+                    if (!!window) {
+                        setTimeout(doCallback, 0);
+                    }
+                    else {
+                        process.nextTick(doCallback);
+                    }
                 }
                 else {
                     doCallback();
@@ -196,7 +210,12 @@
                     });
                 };
                 if (exports.Async) {
-                    setTimeout(doCallback, 0);
+                    if (!!window) {
+                        setTimeout(doCallback, 0);
+                    }
+                    else {
+                        process.nextTick(doCallback);
+                    }
                 }
                 else {
                     doCallback();
@@ -208,10 +227,4 @@
     })();
     exports.FSPromise = FSPromise;
 });
-/**
- * Activate ES6Promise polyfill
- **/
-//export function polyfill(): void {
-//    (<any>ES6Promise).polyfill();
-//}
 //# sourceMappingURL=FSPromise.js.map

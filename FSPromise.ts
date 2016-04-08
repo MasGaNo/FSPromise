@@ -1,8 +1,6 @@
 ﻿/// <reference path="scripts/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="scripts/typings/node/node.d.ts" />
 'use strict';
-
-//import ES6Promise = require('es6-promise');
-//import Promise = ES6Promise.Promise;
 
 export class FSPromiseCancelError {
     name: string;
@@ -56,7 +54,11 @@ export class FSPromise<R> implements Thenable<R> {
             };
 
             if (Async) {
-                setTimeout(doCallback, 0);
+                if (!!window) {
+                    setTimeout(doCallback, 0);
+                } else {
+                    process.nextTick(doCallback);
+                }
             } else {
                 doCallback();
             }
@@ -120,7 +122,11 @@ export class FSPromise<R> implements Thenable<R> {
             }
 
             if (Async) {
-                setTimeout(doCallback, 0);
+                if (!!window) {
+                    setTimeout(doCallback, 0);
+                } else {
+                    process.nextTick(doCallback);
+                }
             } else {
                 doCallback();
             }
@@ -206,7 +212,11 @@ export class FSPromise<R> implements Thenable<R> {
             };
 
             if (Async) {
-                setTimeout(doCallback, 0);
+                if (!!window) {
+                    setTimeout(doCallback, 0);
+                } else {
+                    process.nextTick(doCallback);
+                }
             } else {
                 doCallback();
             }
@@ -246,7 +256,11 @@ export class FSPromise<R> implements Thenable<R> {
             };
 
             if (Async) {
-                setTimeout(doCallback, 0);
+                if (!!window) {
+                    setTimeout(doCallback, 0);
+                } else {
+                    process.nextTick(doCallback);
+                }
             } else {
                 doCallback();
             }
@@ -256,11 +270,3 @@ export class FSPromise<R> implements Thenable<R> {
         return promise;
     }
 }
-
-/**
- * Activate ES6Promise polyfill
- **/
-//export function polyfill(): void {
-//    (<any>ES6Promise).polyfill();
-//}
-
