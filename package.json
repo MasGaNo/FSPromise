@@ -16,7 +16,7 @@
     
   },
   "license": "MIT",
-  "main": "FSPromise.js",
+  "main": "build/FSPromise.js",
   "name": "FSPromise",
   "readme": "FSPromise 0.1.0\r\n=============\r\n\r\nThis project is not ready for use in production. It's still under heavy development. I wrote this for another project I work on right now, but its still far from being stable. Testing are fixes and comments are welcome.\r\n\r\nFor more check out the documentation.md\r\n",
   "readmeFilename": "README.md",
