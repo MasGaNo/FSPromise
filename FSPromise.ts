@@ -55,9 +55,9 @@ export class FSPromise<R> implements Thenable<R> {
 
             if (Async) {
                 if (typeof (global) === 'object') {
-                    setTimeout(doCallback, 0);
-                } else {
                     process.nextTick(doCallback);
+                } else {
+                    setTimeout(doCallback, 0);
                 }
             } else {
                 doCallback();
@@ -123,9 +123,9 @@ export class FSPromise<R> implements Thenable<R> {
 
             if (Async) {
                 if (typeof (global) === 'object') {
-                    setTimeout(doCallback, 0);
-                } else {
                     process.nextTick(doCallback);
+                } else {
+                    setTimeout(doCallback, 0);
                 }
             } else {
                 doCallback();
@@ -213,9 +213,9 @@ export class FSPromise<R> implements Thenable<R> {
 
             if (Async) {
                 if (typeof (global) === 'object') {
-                    setTimeout(doCallback, 0);
-                } else {
                     process.nextTick(doCallback);
+                } else {
+                    setTimeout(doCallback, 0);
                 }
             } else {
                 doCallback();
@@ -257,9 +257,9 @@ export class FSPromise<R> implements Thenable<R> {
 
             if (Async) {
                 if (typeof (global) === 'object') {
-                    setTimeout(doCallback, 0);
-                } else {
                     process.nextTick(doCallback);
+                } else {
+                    setTimeout(doCallback, 0);
                 }
             } else {
                 doCallback();

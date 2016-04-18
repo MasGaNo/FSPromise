@@ -47,10 +47,10 @@
                 };
                 if (exports.Async) {
                     if (typeof (global) === 'object') {
-                        setTimeout(doCallback, 0);
+                        process.nextTick(doCallback);
                     }
                     else {
-                        process.nextTick(doCallback);
+                        setTimeout(doCallback, 0);
                     }
                 }
                 else {
@@ -106,10 +106,10 @@
                 };
                 if (exports.Async) {
                     if (typeof (global) === 'object') {
-                        setTimeout(doCallback, 0);
+                        process.nextTick(doCallback);
                     }
                     else {
-                        process.nextTick(doCallback);
+                        setTimeout(doCallback, 0);
                     }
                 }
                 else {
@@ -177,10 +177,10 @@
                 };
                 if (exports.Async) {
                     if (typeof (global) === 'object') {
-                        setTimeout(doCallback, 0);
+                        process.nextTick(doCallback);
                     }
                     else {
-                        process.nextTick(doCallback);
+                        setTimeout(doCallback, 0);
                     }
                 }
                 else {
@@ -211,10 +211,10 @@
                 };
                 if (exports.Async) {
                     if (typeof (global) === 'object') {
-                        setTimeout(doCallback, 0);
+                        process.nextTick(doCallback);
                     }
                     else {
-                        process.nextTick(doCallback);
+                        setTimeout(doCallback, 0);
                     }
                 }
                 else {
