@@ -14,6 +14,8 @@ export class FSPromiseCancelError {
 
 export var Async = false;
 
+var isNextTick = (typeof (global) === 'object');
+
 export class FSPromise<R> implements Thenable<R> {
 
     private internalPromise: Promise<R>;
@@ -54,7 +56,7 @@ export class FSPromise<R> implements Thenable<R> {
             };
 
             if (Async) {
-                if (typeof (global) === 'object') {
+                if (isNextTick) {
                     process.nextTick(doCallback);
                 } else {
                     setTimeout(doCallback, 0);
@@ -122,7 +124,7 @@ export class FSPromise<R> implements Thenable<R> {
             }
 
             if (Async) {
-                if (typeof (global) === 'object') {
+                if (isNextTick) {
                     process.nextTick(doCallback);
                 } else {
                     setTimeout(doCallback, 0);
@@ -212,7 +214,7 @@ export class FSPromise<R> implements Thenable<R> {
             };
 
             if (Async) {
-                if (typeof (global) === 'object') {
+                if (isNextTick) {
                     process.nextTick(doCallback);
                 } else {
                     setTimeout(doCallback, 0);
@@ -256,7 +258,7 @@ export class FSPromise<R> implements Thenable<R> {
             };
 
             if (Async) {
-                if (typeof (global) === 'object') {
+                if (isNextTick) {
                     process.nextTick(doCallback);
                 } else {
                     setTimeout(doCallback, 0);
