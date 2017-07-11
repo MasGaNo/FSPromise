@@ -12,8 +12,13 @@
     "abort",
     "MasGaNo"
   ],
-  "dependencies": {
-    
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "8.0.10",
+    "typescript": "2.4.1"
+  },
+  "scripts": {
+    "build": "./node_modules/.bin/tsc"
   },
   "license": "MIT",
   "main": "build/FSPromise.js",
@@ -24,5 +29,5 @@
     "type": "git",
     "url": "https://github.com/MasGaNo/FSPromise.git"
   },
-  "version": "0.2.2"
+  "version": "0.3.0"
 }
