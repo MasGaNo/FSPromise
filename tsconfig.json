@@ -4,7 +4,12 @@
         "module": "umd",
         "outDir": "build",
         "sourceMap": true,
-        "declaration": false
+        "declaration": true,
+        "declarationDir": "./scripts/typings/fspromise",
+        "lib": [
+            "es2015",
+            "dom"
+        ]
     },
     "files": [
         "FSPromise.ts"

@@ -1,20 +1,17 @@
-﻿/// <reference path="scripts/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path="scripts/typings/node/node.d.ts" />
-'use strict';
+﻿'use strict';
 
-export class FSPromiseCancelError {
+export class FSPromiseCancelError extends Error {
     name: string;
-    message: string;
 
     constructor(message?: string) {
-        this.message = message;
+        super(message);
         this.name = 'FSPromiseCancelError';
     }
 }
 
 export var Async = false;
 
-export class FSPromise<R> implements Thenable<R> {
+export class FSPromise<R> implements PromiseLike<R> {
 
     private internalPromise: Promise<R>;
     private parentPromise: FSPromise<R>;
@@ -27,7 +24,7 @@ export class FSPromise<R> implements Thenable<R> {
 	 * For consistency and debugging (eg stack traces), obj should be an instanceof Error.
 	 * Any errors thrown in the constructor callback will be implicitly passed to reject().
 	 */
-    constructor(callback: (resolve: (value?: R | Thenable<R>) => void, reject: (error?: any) => void) => void) {
+    constructor(callback: (resolve: (value?: R | PromiseLike<R>) => void, reject: (error?: any) => void) => void) {
 
         this.isAbort = false;
 
@@ -76,9 +73,9 @@ export class FSPromise<R> implements Thenable<R> {
      * @param onFulfilled called when/if "promise" resolves
      * @param onRejected called when/if "promise" rejects
      */
-    then<U>(onFulfilled?: (value: R) => U | Thenable<U>, onRejected?: (error: any) => U | Thenable<U>): FSPromise<U> {
+    then<U>(onFulfilled?: (value: R) => U | PromiseLike<U>, onRejected?: (error: any) => U | PromiseLike<U>): FSPromise<U> {
 
-        let promise = new FSPromise((resolve, reject) => {
+        let promise = new FSPromise<any>((resolve, reject) => {
 
             let doCallback = () => {
                 this.internalPromise.then((value: R) => {
@@ -93,7 +90,7 @@ export class FSPromise<R> implements Thenable<R> {
                     }
 
                     try {
-                        let returnValue: U | Thenable<U> = onFulfilled(value);
+                        let returnValue: U | PromiseLike<U> = onFulfilled(value);
                         resolve(returnValue);
                     } catch (e) {
                         reject(e);
@@ -111,7 +108,7 @@ export class FSPromise<R> implements Thenable<R> {
                     }
 
                     try {
-                        let returnValue: U | Thenable<U> = onRejected(error);
+                        let returnValue: U | PromiseLike<U> = onRejected(error);
                         resolve(returnValue);
                     } catch (e) {
                         reject(e);
@@ -143,7 +140,7 @@ export class FSPromise<R> implements Thenable<R> {
      *
      * @param onRejected called when/if "promise" rejects
      */
-    catch<U>(onRejected?: (error: any) => U | Thenable<U>): FSPromise<U> {
+    catch<U>(onRejected?: (error: any) => U | PromiseLike<U>): FSPromise<U> {
 
         return this.then(null, onRejected);
 
@@ -162,10 +159,10 @@ export class FSPromise<R> implements Thenable<R> {
 
 
     /**
-	 * Make a new promise from the thenable.
-	 * A thenable is promise-like in as far as it has a "then" method.
+	 * Make a new promise from the PromiseLike.
+	 * A PromiseLike is promise-like in as far as it has a "then" method.
 	 */
-    public static resolve<R>(value?: R | Thenable<R>): FSPromise<R> {
+    public static resolve<R>(value?: R | PromiseLike<R>): FSPromise<R> {
         return new FSPromise((resolve, reject) => {
             resolve(value);
         });
@@ -185,8 +182,8 @@ export class FSPromise<R> implements Thenable<R> {
      * the array passed to all can be a mixture of promise-like objects and other objects.
      * The fulfillment value is an array (in order) of fulfillment values. The rejection value is the first rejection value.
      */
-    public static all<R>(promises: (R | Thenable<R>)[]): FSPromise<R[]> {
-        let promise = new FSPromise((resolve, reject) => {
+    public static all<R>(promises: (R | PromiseLike<R>)[]): FSPromise<R[]> {
+        let promise = new FSPromise<R[]>((resolve, reject) => {
 
             let doCallback = () => {
 
@@ -229,8 +226,8 @@ export class FSPromise<R> implements Thenable<R> {
     /**
      * Make a Promise that fulfills when any item fulfills, and rejects if any item rejects.
      */
-    public static race<R>(promises: (R | Thenable<R>)[]): FSPromise<R> {
-        let promise = new FSPromise((resolve, reject) => {
+    public static race<R>(promises: (R | PromiseLike<R>)[]): FSPromise<R> {
+        let promise = new FSPromise<R>((resolve, reject) => {
 
             let doCallback = () => {
                 Promise.race(promises).then((value) => {

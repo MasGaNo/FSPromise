@@ -1,21 +1,33 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 (function (factory) {
-    if (typeof module === 'object' && typeof module.exports === 'object') {
-        var v = factory(require, exports); if (v !== undefined) module.exports = v;
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
     }
-    else if (typeof define === 'function' && define.amd) {
+    else if (typeof define === "function" && define.amd) {
         define(["require", "exports"], factory);
     }
 })(function (require, exports) {
-    /// <reference path="scripts/typings/es6-promise/es6-promise.d.ts" />
-    /// <reference path="scripts/typings/node/node.d.ts" />
     'use strict';
-    var FSPromiseCancelError = (function () {
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var FSPromiseCancelError = (function (_super) {
+        __extends(FSPromiseCancelError, _super);
         function FSPromiseCancelError(message) {
-            this.message = message;
-            this.name = 'FSPromiseCancelError';
+            var _this = _super.call(this, message) || this;
+            _this.name = 'FSPromiseCancelError';
+            return _this;
         }
         return FSPromiseCancelError;
-    })();
+    }(Error));
     exports.FSPromiseCancelError = FSPromiseCancelError;
     exports.Async = false;
     var FSPromise = (function () {
@@ -137,8 +149,8 @@
             }
         };
         /**
-         * Make a new promise from the thenable.
-         * A thenable is promise-like in as far as it has a "then" method.
+         * Make a new promise from the PromiseLike.
+         * A PromiseLike is promise-like in as far as it has a "then" method.
          */
         FSPromise.resolve = function (value) {
             return new FSPromise(function (resolve, reject) {
@@ -224,7 +236,7 @@
             return promise;
         };
         return FSPromise;
-    })();
+    }());
     exports.FSPromise = FSPromise;
 });
 //# sourceMappingURL=FSPromise.js.map
