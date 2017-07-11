@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 export class FSPromiseCancelError extends Error {
     name: string;
@@ -10,6 +10,8 @@ export class FSPromiseCancelError extends Error {
 }
 
 export var Async = false;
+
+var isNextTick = (typeof (global) === 'object');
 
 export class FSPromise<R> implements PromiseLike<R> {
 
@@ -51,7 +53,7 @@ export class FSPromise<R> implements PromiseLike<R> {
             };
 
             if (Async) {
-                if (typeof (global) === 'object') {
+                if (isNextTick) {
                     process.nextTick(doCallback);
                 } else {
                     setTimeout(doCallback, 0);
@@ -119,7 +121,7 @@ export class FSPromise<R> implements PromiseLike<R> {
             }
 
             if (Async) {
-                if (typeof (global) === 'object') {
+                if (isNextTick) {
                     process.nextTick(doCallback);
                 } else {
                     setTimeout(doCallback, 0);
@@ -209,7 +211,7 @@ export class FSPromise<R> implements PromiseLike<R> {
             };
 
             if (Async) {
-                if (typeof (global) === 'object') {
+                if (isNextTick) {
                     process.nextTick(doCallback);
                 } else {
                     setTimeout(doCallback, 0);
@@ -253,7 +255,7 @@ export class FSPromise<R> implements PromiseLike<R> {
             };
 
             if (Async) {
-                if (typeof (global) === 'object') {
+                if (isNextTick) {
                     process.nextTick(doCallback);
                 } else {
                     setTimeout(doCallback, 0);
