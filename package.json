@@ -23,12 +23,12 @@
   "license": "MIT",
   "main": "build/FSPromise.js",
   "name": "FSPromise",
-  "readme": "FSPromise 0.1.0\r\n=============\r\n\r\nThis project is not ready for use in production. It's still under heavy development. I wrote this for another project I work on right now, but its still far from being stable. Testing are fixes and comments are welcome.\r\n\r\nFor more check out the documentation.md\r\n",
+  "readme": "FSPromise 0.4.0\r\n=============\r\n\r\nThis project is not ready for use in production. It's still under heavy development. I wrote this for another project I work on right now, but its still far from being stable. Testing are fixes and comments are welcome.\r\n\r\nFor more check out the documentation.md\r\n",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/MasGaNo/FSPromise.git"
   },
   "types": "./scripts/typings/fspromise/fspromise.d.ts",
-  "version": "0.3.1"
+  "version": "0.4.0"
 }

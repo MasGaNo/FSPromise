@@ -1,4 +1,4 @@
-# FSPromise 0.3.1
+# FSPromise 0.4.0
 ==============
 
 This project could be used in production. I wrote this for another project I'm working on right now. Testing, fixes and comments are welcome.
