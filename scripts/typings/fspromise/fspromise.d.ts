@@ -56,3 +56,4 @@ export declare class FSPromise<R> implements PromiseLike<R> {
      */
     static race<R>(promises: (R | PromiseLike<R>)[]): FSPromise<R>;
 }
+export default FSPromise;
