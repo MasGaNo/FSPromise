@@ -2,7 +2,7 @@ export declare class FSPromiseCancelError extends Error {
     name: string;
     constructor(message?: string);
 }
-export declare var Async: boolean;
+export declare function setAsync(isAsync: boolean): void;
 export declare class FSPromise<R> implements PromiseLike<R> {
     private internalPromise;
     private parentPromise;

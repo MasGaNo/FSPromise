@@ -29,7 +29,12 @@ var __extends = (this && this.__extends) || (function () {
         return FSPromiseCancelError;
     }(Error));
     exports.FSPromiseCancelError = FSPromiseCancelError;
-    exports.Async = false;
+    var Async = false;
+    var isNextTick = (typeof (global) === 'object');
+    function setAsync(isAsync) {
+        Async = isAsync;
+    }
+    exports.setAsync = setAsync;
     var FSPromise = (function () {
         /**
          * If you call resolve in the body of the callback passed to the constructor,
@@ -57,8 +62,8 @@ var __extends = (this && this.__extends) || (function () {
                         reject(e);
                     }
                 };
-                if (exports.Async) {
-                    if (typeof (global) === 'object') {
+                if (Async) {
+                    if (isNextTick) {
                         process.nextTick(doCallback);
                     }
                     else {
@@ -116,8 +121,8 @@ var __extends = (this && this.__extends) || (function () {
                         }
                     });
                 };
-                if (exports.Async) {
-                    if (typeof (global) === 'object') {
+                if (Async) {
+                    if (isNextTick) {
                         process.nextTick(doCallback);
                     }
                     else {
@@ -187,8 +192,8 @@ var __extends = (this && this.__extends) || (function () {
                         reject(error);
                     });
                 };
-                if (exports.Async) {
-                    if (typeof (global) === 'object') {
+                if (Async) {
+                    if (isNextTick) {
                         process.nextTick(doCallback);
                     }
                     else {
@@ -221,8 +226,8 @@ var __extends = (this && this.__extends) || (function () {
                         reject(error);
                     });
                 };
-                if (exports.Async) {
-                    if (typeof (global) === 'object') {
+                if (Async) {
+                    if (isNextTick) {
                         process.nextTick(doCallback);
                     }
                     else {

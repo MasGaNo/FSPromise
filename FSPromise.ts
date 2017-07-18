@@ -9,9 +9,13 @@ export class FSPromiseCancelError extends Error {
     }
 }
 
-export var Async = false;
+var Async = false;
 
 var isNextTick = (typeof (global) === 'object');
+
+export function setAsync(isAsync: boolean) {
+    Async = isAsync;
+}
 
 export class FSPromise<R> implements PromiseLike<R> {
 
