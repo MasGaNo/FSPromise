@@ -243,5 +243,6 @@ var __extends = (this && this.__extends) || (function () {
         return FSPromise;
     }());
     exports.FSPromise = FSPromise;
+    exports.default = FSPromise;
 });
 //# sourceMappingURL=FSPromise.js.map

@@ -273,3 +273,5 @@ export class FSPromise<R> implements PromiseLike<R> {
         return promise;
     }
 }
+
+export default FSPromise;
