@@ -18,7 +18,9 @@
     "typescript": "2.4.1"
   },
   "scripts": {
-    "build": "./node_modules/.bin/tsc"
+    "build": "./node_modules/.bin/tsc",
+    "start": "npm run build",
+    "watch": "npm run build && ./node_modules/.bin/tsc -w"
   },
   "license": "MIT",
   "main": "build/FSPromise.js",
@@ -30,5 +32,5 @@
     "url": "https://github.com/MasGaNo/FSPromise.git"
   },
   "types": "./scripts/typings/fspromise/fspromise.d.ts",
-  "version": "0.4.1"
+  "version": "0.5.0"
 }
