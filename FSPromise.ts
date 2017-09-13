@@ -42,7 +42,7 @@ export class FSPromise<R> implements PromiseLike<R> {
                     callback((value) => {
 
                         if (this.isAbort) {
-                            reject(this.abortError);
+                            return reject(this.abortError);
                         }
 
                         resolve(value);
@@ -68,6 +68,10 @@ export class FSPromise<R> implements PromiseLike<R> {
             }
         });
 
+        this.internalPromise.catch((e) => {
+            /** */
+        })
+
     }
 
     /**
@@ -89,6 +93,10 @@ export class FSPromise<R> implements PromiseLike<R> {
 
                     if (this.isAbort) {
                         reject(this.abortError);
+                        if (onRejected) {
+                            onRejected(this.abortError);
+                        }
+                        return;
                     }
 
                     if (!onFulfilled) {
@@ -107,6 +115,11 @@ export class FSPromise<R> implements PromiseLike<R> {
 
                     if (this.isAbort) {
                         reject(this.abortError);
+                        if (onRejected) {
+                            onRejected(this.abortError);
+                        }
+
+                        return;
                     }
 
                     if (!onRejected) {

@@ -51,7 +51,7 @@ var __extends = (this && this.__extends) || (function () {
                     try {
                         callback(function (value) {
                             if (_this.isAbort) {
-                                reject(_this.abortError);
+                                return reject(_this.abortError);
                             }
                             resolve(value);
                         }, function (value) {
@@ -74,6 +74,9 @@ var __extends = (this && this.__extends) || (function () {
                     doCallback();
                 }
             });
+            this.internalPromise.catch(function (e) {
+                /** */
+            });
         }
         /**
          * onFulfilled is called when/if "promise" resolves. onRejected is called when/if "promise" rejects.
@@ -92,6 +95,10 @@ var __extends = (this && this.__extends) || (function () {
                     _this.internalPromise.then(function (value) {
                         if (_this.isAbort) {
                             reject(_this.abortError);
+                            if (onRejected) {
+                                onRejected(_this.abortError);
+                            }
+                            return;
                         }
                         if (!onFulfilled) {
                             resolve(value);
@@ -107,6 +114,10 @@ var __extends = (this && this.__extends) || (function () {
                     }, function (error) {
                         if (_this.isAbort) {
                             reject(_this.abortError);
+                            if (onRejected) {
+                                onRejected(_this.abortError);
+                            }
+                            return;
                         }
                         if (!onRejected) {
                             reject(error);
