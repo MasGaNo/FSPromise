@@ -22,6 +22,7 @@ export class FSPromise<R> implements PromiseLike<R> {
     private internalPromise: Promise<R>;
     private parentPromise: FSPromise<R>;
     private isAbort: boolean;
+    private abortError: FSPromiseCancelError;
 
 	/**
 	 * If you call resolve in the body of the callback passed to the constructor,
@@ -41,7 +42,7 @@ export class FSPromise<R> implements PromiseLike<R> {
                     callback((value) => {
 
                         if (this.isAbort) {
-                            reject(new FSPromiseCancelError('Cancel'));
+                            return reject(this.abortError);
                         }
 
                         resolve(value);
@@ -67,6 +68,10 @@ export class FSPromise<R> implements PromiseLike<R> {
             }
         });
 
+        this.internalPromise.catch((e) => {
+            /** */
+        })
+
     }
 
     /**
@@ -87,7 +92,11 @@ export class FSPromise<R> implements PromiseLike<R> {
                 this.internalPromise.then((value: R) => {
 
                     if (this.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
+                        reject(this.abortError);
+                        if (onRejected) {
+                            onRejected(this.abortError);
+                        }
+                        return;
                     }
 
                     if (!onFulfilled) {
@@ -105,7 +114,12 @@ export class FSPromise<R> implements PromiseLike<R> {
                 }, (error) => {
 
                     if (this.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
+                        reject(this.abortError);
+                        if (onRejected) {
+                            onRejected(this.abortError);
+                        }
+
+                        return;
                     }
 
                     if (!onRejected) {
@@ -156,9 +170,14 @@ export class FSPromise<R> implements PromiseLike<R> {
      * Trigger an catchable FSPromiseCancelError and stop execution of Promise
      */
     abort(): void {
+        this._abort(new FSPromiseCancelError('Cancel'));
+    }
+
+    private _abort(abortError: FSPromiseCancelError): void {
+        this.abortError = abortError;
         this.isAbort = true;
         if (!!this.parentPromise) {
-            this.parentPromise.abort();
+            this.parentPromise._abort(this.abortError);
         }
     }
 
@@ -196,7 +215,7 @@ export class FSPromise<R> implements PromiseLike<R> {
                 Promise.all(promises).then((value) => {
 
                     if (promise.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
+                        reject(promise.abortError);
                         return;
                     }
 
@@ -205,7 +224,7 @@ export class FSPromise<R> implements PromiseLike<R> {
                 }, (error) => {
 
                     if (promise.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
+                        reject(promise.abortError);
                         return;
                     }
 
@@ -239,7 +258,7 @@ export class FSPromise<R> implements PromiseLike<R> {
                 Promise.race(promises).then((value) => {
 
                     if (promise.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
+                        reject(promise.abortError);
                         return;
                     }
 
@@ -248,7 +267,7 @@ export class FSPromise<R> implements PromiseLike<R> {
                 }, (error) => {
 
                     if (promise.isAbort) {
-                        reject(new FSPromiseCancelError('Cancel'));
+                        reject(promise.abortError);
                         return;
                     }
 

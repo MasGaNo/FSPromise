@@ -7,6 +7,7 @@ export declare class FSPromise<R> implements PromiseLike<R> {
     private internalPromise;
     private parentPromise;
     private isAbort;
+    private abortError;
     /**
      * If you call resolve in the body of the callback passed to the constructor,
      * your promise is fulfilled with result object passed to resolve.
@@ -36,6 +37,7 @@ export declare class FSPromise<R> implements PromiseLike<R> {
      * Trigger an catchable FSPromiseCancelError and stop execution of Promise
      */
     abort(): void;
+    private _abort(abortError);
     /**
      * Make a new promise from the PromiseLike.
      * A PromiseLike is promise-like in as far as it has a "then" method.

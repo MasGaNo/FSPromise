@@ -51,7 +51,7 @@ var __extends = (this && this.__extends) || (function () {
                     try {
                         callback(function (value) {
                             if (_this.isAbort) {
-                                reject(new FSPromiseCancelError('Cancel'));
+                                return reject(_this.abortError);
                             }
                             resolve(value);
                         }, function (value) {
@@ -74,6 +74,9 @@ var __extends = (this && this.__extends) || (function () {
                     doCallback();
                 }
             });
+            this.internalPromise.catch(function (e) {
+                /** */
+            });
         }
         /**
          * onFulfilled is called when/if "promise" resolves. onRejected is called when/if "promise" rejects.
@@ -91,7 +94,11 @@ var __extends = (this && this.__extends) || (function () {
                 var doCallback = function () {
                     _this.internalPromise.then(function (value) {
                         if (_this.isAbort) {
-                            reject(new FSPromiseCancelError('Cancel'));
+                            reject(_this.abortError);
+                            if (onRejected) {
+                                onRejected(_this.abortError);
+                            }
+                            return;
                         }
                         if (!onFulfilled) {
                             resolve(value);
@@ -106,7 +113,11 @@ var __extends = (this && this.__extends) || (function () {
                         }
                     }, function (error) {
                         if (_this.isAbort) {
-                            reject(new FSPromiseCancelError('Cancel'));
+                            reject(_this.abortError);
+                            if (onRejected) {
+                                onRejected(_this.abortError);
+                            }
+                            return;
                         }
                         if (!onRejected) {
                             reject(error);
@@ -148,9 +159,13 @@ var __extends = (this && this.__extends) || (function () {
          * Trigger an catchable FSPromiseCancelError and stop execution of Promise
          */
         FSPromise.prototype.abort = function () {
+            this._abort(new FSPromiseCancelError('Cancel'));
+        };
+        FSPromise.prototype._abort = function (abortError) {
+            this.abortError = abortError;
             this.isAbort = true;
             if (!!this.parentPromise) {
-                this.parentPromise.abort();
+                this.parentPromise._abort(this.abortError);
             }
         };
         /**
@@ -180,13 +195,13 @@ var __extends = (this && this.__extends) || (function () {
                 var doCallback = function () {
                     Promise.all(promises).then(function (value) {
                         if (promise.isAbort) {
-                            reject(new FSPromiseCancelError('Cancel'));
+                            reject(promise.abortError);
                             return;
                         }
                         resolve(value);
                     }, function (error) {
                         if (promise.isAbort) {
-                            reject(new FSPromiseCancelError('Cancel'));
+                            reject(promise.abortError);
                             return;
                         }
                         reject(error);
@@ -214,13 +229,13 @@ var __extends = (this && this.__extends) || (function () {
                 var doCallback = function () {
                     Promise.race(promises).then(function (value) {
                         if (promise.isAbort) {
-                            reject(new FSPromiseCancelError('Cancel'));
+                            reject(promise.abortError);
                             return;
                         }
                         resolve(value);
                     }, function (error) {
                         if (promise.isAbort) {
-                            reject(new FSPromiseCancelError('Cancel'));
+                            reject(promise.abortError);
                             return;
                         }
                         reject(error);
