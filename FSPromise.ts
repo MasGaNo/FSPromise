@@ -170,7 +170,17 @@ export class FSPromise<R> implements Promise<R> {
     catch<U>(onRejected?: (error: any) => U | PromiseLike<U>): FSPromise<U> {
 
         return this.then(null, onRejected) as FSPromise<U>;
+    }
 
+
+    finally(onFinally: () => void): FSPromise<R> {
+
+        this.internalPromise.then(() => {
+            onFinally();
+        }, () => {
+            onFinally();
+        });
+        return this;
     }
 
     /**
