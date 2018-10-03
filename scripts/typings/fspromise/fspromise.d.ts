@@ -1,13 +1,16 @@
-export declare class FSPromiseCancelError extends Error {
+export declare class FSPromiseError extends Error {
     name: string;
     constructor(message?: string);
 }
+export declare class FSPromiseCancelError extends FSPromiseError {
+    constructor(message?: string);
+}
 export declare function setAsync(isAsync: boolean): void;
-export declare class FSPromise<R> implements PromiseLike<R> {
+export declare class FSPromise<R> implements Promise<R> {
     private internalPromise;
     private parentPromise;
-    private isAbort;
-    private abortError;
+    private _isAbort;
+    private _abortError;
     /**
      * If you call resolve in the body of the callback passed to the constructor,
      * your promise is fulfilled with result object passed to resolve.
@@ -26,7 +29,7 @@ export declare class FSPromise<R> implements PromiseLike<R> {
      * @param onFulfilled called when/if "promise" resolves
      * @param onRejected called when/if "promise" rejects
      */
-    then<U>(onFulfilled?: (value: R) => U | PromiseLike<U>, onRejected?: (error: any) => U | PromiseLike<U>): FSPromise<U>;
+    then<TResult1 = R, TResult2 = never>(onFulfilled?: (value: R) => TResult1 | PromiseLike<TResult1>, onRejected?: (error: any) => TResult2 | PromiseLike<TResult2>): FSPromise<TResult1 | TResult2>;
     /**
      * Sugar for promise.then(undefined, onRejected)
      *
@@ -37,7 +40,9 @@ export declare class FSPromise<R> implements PromiseLike<R> {
      * Trigger an catchable FSPromiseCancelError and stop execution of Promise
      */
     abort(): void;
-    private _abort(abortError);
+    private _abort;
+    protected readonly isAbort: boolean;
+    protected readonly abortError: FSPromiseCancelError;
     /**
      * Make a new promise from the PromiseLike.
      * A PromiseLike is promise-like in as far as it has a "then" method.
@@ -57,5 +62,6 @@ export declare class FSPromise<R> implements PromiseLike<R> {
      * Make a Promise that fulfills when any item fulfills, and rejects if any item rejects.
      */
     static race<R>(promises: (R | PromiseLike<R>)[]): FSPromise<R>;
+    readonly [Symbol.toStringTag]: "Promise";
 }
 export default FSPromise;

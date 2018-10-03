@@ -1,11 +1,18 @@
 'use strict';
 
-export class FSPromiseCancelError extends Error {
+export class FSPromiseError extends Error {
     name: string;
 
     constructor(message?: string) {
         super(message);
         this.name = 'FSPromiseCancelError';
+    }
+}
+
+export class FSPromiseCancelError extends FSPromiseError {
+
+    constructor(message?: string) {
+        super(message);
     }
 }
 
@@ -17,12 +24,12 @@ export function setAsync(isAsync: boolean) {
     Async = isAsync;
 }
 
-export class FSPromise<R> implements PromiseLike<R> {
+export class FSPromise<R> implements Promise<R> {
 
     private internalPromise: Promise<R>;
     private parentPromise: FSPromise<R>;
-    private isAbort: boolean;
-    private abortError: FSPromiseCancelError;
+    private _isAbort: boolean;
+    private _abortError: FSPromiseCancelError;
 
 	/**
 	 * If you call resolve in the body of the callback passed to the constructor,
@@ -33,7 +40,7 @@ export class FSPromise<R> implements PromiseLike<R> {
 	 */
     constructor(callback: (resolve: (value?: R | PromiseLike<R>) => void, reject: (error?: any) => void) => void) {
 
-        this.isAbort = false;
+        this._isAbort = false;
 
         this.internalPromise = new Promise((resolve, reject) => {
 
@@ -41,8 +48,8 @@ export class FSPromise<R> implements PromiseLike<R> {
                 try {
                     callback((value) => {
 
-                        if (this.isAbort) {
-                            return reject(this.abortError);
+                        if (this._isAbort) {
+                            return reject(this._abortError);
                         }
 
                         resolve(value);
@@ -84,17 +91,17 @@ export class FSPromise<R> implements PromiseLike<R> {
      * @param onFulfilled called when/if "promise" resolves
      * @param onRejected called when/if "promise" rejects
      */
-    then<U>(onFulfilled?: (value: R) => U | PromiseLike<U>, onRejected?: (error: any) => U | PromiseLike<U>): FSPromise<U> {
+    then<TResult1 = R, TResult2 = never>(onFulfilled?: (value: R) => TResult1 | PromiseLike<TResult1>, onRejected?: (error: any) => TResult2 | PromiseLike<TResult2>): FSPromise<TResult1 | TResult2> {
 
         let promise = new FSPromise<any>((resolve, reject) => {
 
             let doCallback = () => {
                 this.internalPromise.then((value: R) => {
 
-                    if (this.isAbort) {
-                        reject(this.abortError);
+                    if (this._isAbort) {
+                        reject(this._abortError);
                         if (onRejected) {
-                            onRejected(this.abortError);
+                            onRejected(this._abortError);
                         }
                         return;
                     }
@@ -105,7 +112,7 @@ export class FSPromise<R> implements PromiseLike<R> {
                     }
 
                     try {
-                        let returnValue: U | PromiseLike<U> = onFulfilled(value);
+                        let returnValue: TResult1 | PromiseLike<TResult1> = onFulfilled(value);
                         resolve(returnValue);
                     } catch (e) {
                         reject(e);
@@ -113,10 +120,10 @@ export class FSPromise<R> implements PromiseLike<R> {
 
                 }, (error) => {
 
-                    if (this.isAbort) {
-                        reject(this.abortError);
+                    if (this._isAbort) {
+                        reject(this._abortError);
                         if (onRejected) {
-                            onRejected(this.abortError);
+                            onRejected(this._abortError);
                         }
 
                         return;
@@ -128,7 +135,7 @@ export class FSPromise<R> implements PromiseLike<R> {
                     }
 
                     try {
-                        let returnValue: U | PromiseLike<U> = onRejected(error);
+                        let returnValue: TResult2 | PromiseLike<TResult2> = onRejected(error);
                         resolve(returnValue);
                     } catch (e) {
                         reject(e);
@@ -152,7 +159,7 @@ export class FSPromise<R> implements PromiseLike<R> {
         promise.parentPromise = this;
 
         return promise;
-   
+
     }
 
     /**
@@ -162,7 +169,7 @@ export class FSPromise<R> implements PromiseLike<R> {
      */
     catch<U>(onRejected?: (error: any) => U | PromiseLike<U>): FSPromise<U> {
 
-        return this.then(null, onRejected);
+        return this.then(null, onRejected) as FSPromise<U>;
 
     }
 
@@ -174,13 +181,20 @@ export class FSPromise<R> implements PromiseLike<R> {
     }
 
     private _abort(abortError: FSPromiseCancelError): void {
-        this.abortError = abortError;
-        this.isAbort = true;
+        this._abortError = abortError;
+        this._isAbort = true;
         if (!!this.parentPromise) {
-            this.parentPromise._abort(this.abortError);
+            this.parentPromise._abort(this._abortError);
         }
     }
 
+    protected get isAbort() {
+        return this._isAbort;
+    }
+
+    protected get abortError() {
+        return this._abortError;
+    }
 
 
     /**
@@ -214,8 +228,8 @@ export class FSPromise<R> implements PromiseLike<R> {
 
                 Promise.all(promises).then((value) => {
 
-                    if (promise.isAbort) {
-                        reject(promise.abortError);
+                    if (promise._isAbort) {
+                        reject(promise._abortError);
                         return;
                     }
 
@@ -223,8 +237,8 @@ export class FSPromise<R> implements PromiseLike<R> {
 
                 }, (error) => {
 
-                    if (promise.isAbort) {
-                        reject(promise.abortError);
+                    if (promise._isAbort) {
+                        reject(promise._abortError);
                         return;
                     }
 
@@ -257,8 +271,8 @@ export class FSPromise<R> implements PromiseLike<R> {
             let doCallback = () => {
                 Promise.race(promises).then((value) => {
 
-                    if (promise.isAbort) {
-                        reject(promise.abortError);
+                    if (promise._isAbort) {
+                        reject(promise._abortError);
                         return;
                     }
 
@@ -266,8 +280,8 @@ export class FSPromise<R> implements PromiseLike<R> {
 
                 }, (error) => {
 
-                    if (promise.isAbort) {
-                        reject(promise.abortError);
+                    if (promise._isAbort) {
+                        reject(promise._abortError);
                         return;
                     }
 
@@ -291,6 +305,192 @@ export class FSPromise<R> implements PromiseLike<R> {
 
         return promise;
     }
+
+    readonly [Symbol.toStringTag]: "Promise";
 }
+
+// export module FSPromiseExtended {
+
+//     export class FSPromiseStream<R> extends FSPromise<R>
+//     {
+//         /**
+//          * Make a Promise that always fulfills when all items complete (by fulfill or rejecting).
+//          */
+//         public static stream<R>(promises: (R | PromiseLike<R[]> | FSPromise<R[]>)[]): FSPromiseStream<R[]> {
+//             let promise = new FSPromiseStream<R>((resolve, reject) => {
+
+//                 let doCallback = () => {
+
+//                     const result = []
+//                     let count = 0;
+//                     const max = promises.length;
+
+//                     function complete(value, index) {
+//                         result[index] = value;
+//                         if (++count >= max) {
+//                             resolve(result);
+//                         }
+//                     }
+
+//                     promises.forEach((promise, index) => {
+//                         if (!(promise instanceof FSPromise)) {
+//                             throw new FSPromiseError(`FSPromiseRaceExtended.raceResolve accept only PromiseLike`);
+//                         }
+
+//                         promise.then((value) => {
+//                             if ((promise as FSPromiseStream<R>).isAbort) {
+//                                 reject((promise as FSPromiseStream<R>).abortError);
+//                                 return;
+//                             }
+
+//                             resolve(value);
+//                         }, (error) => {
+
+//                             if ((promise as FSPromiseStream<R>).isAbort) {
+//                                 reject((promise as FSPromiseStream<R>).abortError);
+//                                 return;
+//                             }
+
+//                             error[index] = error;
+//                             if (++count >= max) {
+//                                 reject(error);
+//                             }
+
+//                         });
+//                     });
+
+//                 };
+
+//                 if (Async) {
+//                     if (isNextTick) {
+//                         process.nextTick(doCallback);
+//                     } else {
+//                         setTimeout(doCallback, 0);
+//                     }
+//                 } else {
+//                     doCallback();
+//                 }
+
+//             });
+
+//             return promise;
+//         }
+//     }
+
+//     export class FSPromiseRaceExtended<R> extends FSPromise<R>
+//     {
+//         /**
+//          * Make a Promise that fulfills when first item fulfills, and rejects if all items reject.
+//          */
+//         public static raceResolve<R>(promises: (PromiseLike<R> | FSPromise<R>)[]): FSPromise<R> {
+//             let promise = new FSPromise<R>((resolve, reject) => {
+
+//                 let doCallback = () => {
+
+//                     const error = [];
+//                     let count = 0;
+//                     const max = promises.length;
+
+//                     promises.forEach((promise, index) => {
+//                         if (!(promise instanceof FSPromise)) {
+//                             throw new FSPromiseError(`FSPromiseRaceExtended.raceResolve accept only PromiseLike`);
+//                         }
+
+//                         promise.then((value) => {
+//                             if ((promise as FSPromiseRaceExtended<R>).isAbort) {
+//                                 reject((promise as FSPromiseRaceExtended<R>).abortError);
+//                                 return;
+//                             }
+
+//                             resolve(value);
+//                         }, (error) => {
+
+//                             if ((promise as FSPromiseRaceExtended<R>).isAbort) {
+//                                 reject((promise as FSPromiseRaceExtended<R>).abortError);
+//                                 return;
+//                             }
+
+//                             error[index] = error;
+//                             if (++count >= max) {
+//                                 reject(error);
+//                             }
+
+//                         });
+//                     });
+
+//                 };
+
+//                 if (Async) {
+//                     if (isNextTick) {
+//                         process.nextTick(doCallback);
+//                     } else {
+//                         setTimeout(doCallback, 0);
+//                     }
+//                 } else {
+//                     doCallback();
+//                 }
+
+//             });
+
+//             return promise;
+//         }
+
+//         /**
+//          * Make a Promise that fulfills when first item rejects, and rejects if all items fullfill.
+//          */
+//         public static raceReject<R>(promises: (PromiseLike<R> | FSPromise<R>)[]): FSPromise<R> {
+//             let promise = new FSPromise<R>((resolve, reject) => {
+
+//                 let doCallback = () => {
+
+//                     const error = [];
+//                     let count = 0;
+//                     const max = promises.length;
+
+//                     promises.forEach((promise, index) => {
+//                         if (!(promise instanceof FSPromise)) {
+//                             throw new FSPromiseError(`FSPromiseRaceExtended.raceResolve accept only PromiseLike`);
+//                         }
+
+//                         promise.then((error) => {
+
+//                             if ((promise as FSPromiseRaceExtended<R>).isAbort) {
+//                                 reject((promise as FSPromiseRaceExtended<R>).abortError);
+//                                 return;
+//                             }
+
+//                             error[index] = error;
+//                             if (++count >= max) {
+//                                 reject(error);
+//                             }
+
+//                         }, (value) => {
+//                             if ((promise as FSPromiseRaceExtended<R>).isAbort) {
+//                                 reject((promise as FSPromiseRaceExtended<R>).abortError);
+//                                 return;
+//                             }
+
+//                             resolve(value);
+//                         });
+//                     });
+
+//                 };
+
+//                 if (Async) {
+//                     if (isNextTick) {
+//                         process.nextTick(doCallback);
+//                     } else {
+//                         setTimeout(doCallback, 0);
+//                     }
+//                 } else {
+//                     doCallback();
+//                 }
+
+//             });
+
+//             return promise;
+//         }
+//     }
+// }
 
 export default FSPromise;

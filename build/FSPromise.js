@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -19,15 +22,23 @@ var __extends = (this && this.__extends) || (function () {
 })(function (require, exports) {
     'use strict';
     Object.defineProperty(exports, "__esModule", { value: true });
-    var FSPromiseCancelError = (function (_super) {
-        __extends(FSPromiseCancelError, _super);
-        function FSPromiseCancelError(message) {
+    var FSPromiseError = /** @class */ (function (_super) {
+        __extends(FSPromiseError, _super);
+        function FSPromiseError(message) {
             var _this = _super.call(this, message) || this;
             _this.name = 'FSPromiseCancelError';
             return _this;
         }
-        return FSPromiseCancelError;
+        return FSPromiseError;
     }(Error));
+    exports.FSPromiseError = FSPromiseError;
+    var FSPromiseCancelError = /** @class */ (function (_super) {
+        __extends(FSPromiseCancelError, _super);
+        function FSPromiseCancelError(message) {
+            return _super.call(this, message) || this;
+        }
+        return FSPromiseCancelError;
+    }(FSPromiseError));
     exports.FSPromiseCancelError = FSPromiseCancelError;
     var Async = false;
     var isNextTick = (typeof (global) === 'object');
@@ -35,7 +46,7 @@ var __extends = (this && this.__extends) || (function () {
         Async = isAsync;
     }
     exports.setAsync = setAsync;
-    var FSPromise = (function () {
+    var FSPromise = /** @class */ (function () {
         /**
          * If you call resolve in the body of the callback passed to the constructor,
          * your promise is fulfilled with result object passed to resolve.
@@ -45,13 +56,13 @@ var __extends = (this && this.__extends) || (function () {
          */
         function FSPromise(callback) {
             var _this = this;
-            this.isAbort = false;
+            this._isAbort = false;
             this.internalPromise = new Promise(function (resolve, reject) {
                 var doCallback = function () {
                     try {
                         callback(function (value) {
-                            if (_this.isAbort) {
-                                return reject(_this.abortError);
+                            if (_this._isAbort) {
+                                return reject(_this._abortError);
                             }
                             resolve(value);
                         }, function (value) {
@@ -93,10 +104,10 @@ var __extends = (this && this.__extends) || (function () {
             var promise = new FSPromise(function (resolve, reject) {
                 var doCallback = function () {
                     _this.internalPromise.then(function (value) {
-                        if (_this.isAbort) {
-                            reject(_this.abortError);
+                        if (_this._isAbort) {
+                            reject(_this._abortError);
                             if (onRejected) {
-                                onRejected(_this.abortError);
+                                onRejected(_this._abortError);
                             }
                             return;
                         }
@@ -112,10 +123,10 @@ var __extends = (this && this.__extends) || (function () {
                             reject(e);
                         }
                     }, function (error) {
-                        if (_this.isAbort) {
-                            reject(_this.abortError);
+                        if (_this._isAbort) {
+                            reject(_this._abortError);
                             if (onRejected) {
-                                onRejected(_this.abortError);
+                                onRejected(_this._abortError);
                             }
                             return;
                         }
@@ -162,12 +173,26 @@ var __extends = (this && this.__extends) || (function () {
             this._abort(new FSPromiseCancelError('Cancel'));
         };
         FSPromise.prototype._abort = function (abortError) {
-            this.abortError = abortError;
-            this.isAbort = true;
+            this._abortError = abortError;
+            this._isAbort = true;
             if (!!this.parentPromise) {
-                this.parentPromise._abort(this.abortError);
+                this.parentPromise._abort(this._abortError);
             }
         };
+        Object.defineProperty(FSPromise.prototype, "isAbort", {
+            get: function () {
+                return this._isAbort;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(FSPromise.prototype, "abortError", {
+            get: function () {
+                return this._abortError;
+            },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * Make a new promise from the PromiseLike.
          * A PromiseLike is promise-like in as far as it has a "then" method.
@@ -194,14 +219,14 @@ var __extends = (this && this.__extends) || (function () {
             var promise = new FSPromise(function (resolve, reject) {
                 var doCallback = function () {
                     Promise.all(promises).then(function (value) {
-                        if (promise.isAbort) {
-                            reject(promise.abortError);
+                        if (promise._isAbort) {
+                            reject(promise._abortError);
                             return;
                         }
                         resolve(value);
                     }, function (error) {
-                        if (promise.isAbort) {
-                            reject(promise.abortError);
+                        if (promise._isAbort) {
+                            reject(promise._abortError);
                             return;
                         }
                         reject(error);
@@ -228,14 +253,14 @@ var __extends = (this && this.__extends) || (function () {
             var promise = new FSPromise(function (resolve, reject) {
                 var doCallback = function () {
                     Promise.race(promises).then(function (value) {
-                        if (promise.isAbort) {
-                            reject(promise.abortError);
+                        if (promise._isAbort) {
+                            reject(promise._abortError);
                             return;
                         }
                         resolve(value);
                     }, function (error) {
-                        if (promise.isAbort) {
-                            reject(promise.abortError);
+                        if (promise._isAbort) {
+                            reject(promise._abortError);
                             return;
                         }
                         reject(error);
@@ -258,6 +283,149 @@ var __extends = (this && this.__extends) || (function () {
         return FSPromise;
     }());
     exports.FSPromise = FSPromise;
+    // export module FSPromiseExtended {
+    //     export class FSPromiseStream<R> extends FSPromise<R>
+    //     {
+    //         /**
+    //          * Make a Promise that always fulfills when all items complete (by fulfill or rejecting).
+    //          */
+    //         public static stream<R>(promises: (R | PromiseLike<R[]> | FSPromise<R[]>)[]): FSPromiseStream<R[]> {
+    //             let promise = new FSPromiseStream<R>((resolve, reject) => {
+    //                 let doCallback = () => {
+    //                     const result = []
+    //                     let count = 0;
+    //                     const max = promises.length;
+    //                     function complete(value, index) {
+    //                         result[index] = value;
+    //                         if (++count >= max) {
+    //                             resolve(result);
+    //                         }
+    //                     }
+    //                     promises.forEach((promise, index) => {
+    //                         if (!(promise instanceof FSPromise)) {
+    //                             throw new FSPromiseError(`FSPromiseRaceExtended.raceResolve accept only PromiseLike`);
+    //                         }
+    //                         promise.then((value) => {
+    //                             if ((promise as FSPromiseStream<R>).isAbort) {
+    //                                 reject((promise as FSPromiseStream<R>).abortError);
+    //                                 return;
+    //                             }
+    //                             resolve(value);
+    //                         }, (error) => {
+    //                             if ((promise as FSPromiseStream<R>).isAbort) {
+    //                                 reject((promise as FSPromiseStream<R>).abortError);
+    //                                 return;
+    //                             }
+    //                             error[index] = error;
+    //                             if (++count >= max) {
+    //                                 reject(error);
+    //                             }
+    //                         });
+    //                     });
+    //                 };
+    //                 if (Async) {
+    //                     if (isNextTick) {
+    //                         process.nextTick(doCallback);
+    //                     } else {
+    //                         setTimeout(doCallback, 0);
+    //                     }
+    //                 } else {
+    //                     doCallback();
+    //                 }
+    //             });
+    //             return promise;
+    //         }
+    //     }
+    //     export class FSPromiseRaceExtended<R> extends FSPromise<R>
+    //     {
+    //         /**
+    //          * Make a Promise that fulfills when first item fulfills, and rejects if all items reject.
+    //          */
+    //         public static raceResolve<R>(promises: (PromiseLike<R> | FSPromise<R>)[]): FSPromise<R> {
+    //             let promise = new FSPromise<R>((resolve, reject) => {
+    //                 let doCallback = () => {
+    //                     const error = [];
+    //                     let count = 0;
+    //                     const max = promises.length;
+    //                     promises.forEach((promise, index) => {
+    //                         if (!(promise instanceof FSPromise)) {
+    //                             throw new FSPromiseError(`FSPromiseRaceExtended.raceResolve accept only PromiseLike`);
+    //                         }
+    //                         promise.then((value) => {
+    //                             if ((promise as FSPromiseRaceExtended<R>).isAbort) {
+    //                                 reject((promise as FSPromiseRaceExtended<R>).abortError);
+    //                                 return;
+    //                             }
+    //                             resolve(value);
+    //                         }, (error) => {
+    //                             if ((promise as FSPromiseRaceExtended<R>).isAbort) {
+    //                                 reject((promise as FSPromiseRaceExtended<R>).abortError);
+    //                                 return;
+    //                             }
+    //                             error[index] = error;
+    //                             if (++count >= max) {
+    //                                 reject(error);
+    //                             }
+    //                         });
+    //                     });
+    //                 };
+    //                 if (Async) {
+    //                     if (isNextTick) {
+    //                         process.nextTick(doCallback);
+    //                     } else {
+    //                         setTimeout(doCallback, 0);
+    //                     }
+    //                 } else {
+    //                     doCallback();
+    //                 }
+    //             });
+    //             return promise;
+    //         }
+    //         /**
+    //          * Make a Promise that fulfills when first item rejects, and rejects if all items fullfill.
+    //          */
+    //         public static raceReject<R>(promises: (PromiseLike<R> | FSPromise<R>)[]): FSPromise<R> {
+    //             let promise = new FSPromise<R>((resolve, reject) => {
+    //                 let doCallback = () => {
+    //                     const error = [];
+    //                     let count = 0;
+    //                     const max = promises.length;
+    //                     promises.forEach((promise, index) => {
+    //                         if (!(promise instanceof FSPromise)) {
+    //                             throw new FSPromiseError(`FSPromiseRaceExtended.raceResolve accept only PromiseLike`);
+    //                         }
+    //                         promise.then((error) => {
+    //                             if ((promise as FSPromiseRaceExtended<R>).isAbort) {
+    //                                 reject((promise as FSPromiseRaceExtended<R>).abortError);
+    //                                 return;
+    //                             }
+    //                             error[index] = error;
+    //                             if (++count >= max) {
+    //                                 reject(error);
+    //                             }
+    //                         }, (value) => {
+    //                             if ((promise as FSPromiseRaceExtended<R>).isAbort) {
+    //                                 reject((promise as FSPromiseRaceExtended<R>).abortError);
+    //                                 return;
+    //                             }
+    //                             resolve(value);
+    //                         });
+    //                     });
+    //                 };
+    //                 if (Async) {
+    //                     if (isNextTick) {
+    //                         process.nextTick(doCallback);
+    //                     } else {
+    //                         setTimeout(doCallback, 0);
+    //                     }
+    //                 } else {
+    //                     doCallback();
+    //                 }
+    //             });
+    //             return promise;
+    //         }
+    //     }
+    // }
     exports.default = FSPromise;
 });
 //# sourceMappingURL=FSPromise.js.map
