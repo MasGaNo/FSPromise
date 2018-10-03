@@ -36,6 +36,7 @@ export declare class FSPromise<R> implements Promise<R> {
      * @param onRejected called when/if "promise" rejects
      */
     catch<U>(onRejected?: (error: any) => U | PromiseLike<U>): FSPromise<U>;
+    finally(onFinally: () => void): FSPromise<R>;
     /**
      * Trigger an catchable FSPromiseCancelError and stop execution of Promise
      */

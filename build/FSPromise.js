@@ -166,6 +166,14 @@ var __extends = (this && this.__extends) || (function () {
         FSPromise.prototype.catch = function (onRejected) {
             return this.then(null, onRejected);
         };
+        FSPromise.prototype.finally = function (onFinally) {
+            this.internalPromise.then(function () {
+                onFinally();
+            }, function () {
+                onFinally();
+            });
+            return this;
+        };
         /**
          * Trigger an catchable FSPromiseCancelError and stop execution of Promise
          */
